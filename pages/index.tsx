@@ -15,13 +15,13 @@ import "firebase/database";
 import useNavStore from "../store/useNavStore";
 
 const MainPage = () => {
-  const [setViewers] = useNavStore((store) => [store.setViewers]);
+  const [setViewers, setAdBlock] = useNavStore((store) => [store.setViewers, store.setAdBlock]);
   const [userId, setUserId] = useState("");
   const [location, setLocation] = useState("");
   const database = firebase.database();
 
   // ブラウザを閉じる前に自分を閲覧者から削除
-  const handleBeforeUnload = async (e) => {
+  const handlePageHide = (e) => {
     e.preventDefault();
     e.stopPropagation();
     database
@@ -35,7 +35,12 @@ const MainPage = () => {
       });
   };
 
-  function count_view(viewer_ip) {
+  const handleVisiblityChange = (e) => {
+    console.log(e);
+    if (document.visibilityState !== "visible") handlePageHide(e);
+  };
+
+  function updateDB(viewer_ip) {
     var ip_to_string = viewer_ip.toString();
     for (var i = 0; i < ip_to_string.length; i++) {
       ip_to_string = ip_to_string.replace(".", "-");
@@ -87,21 +92,24 @@ const MainPage = () => {
         .then((response) => response.json())
         .then((data) => {
           const viewer_ip = data["ip"];
-          count_view(viewer_ip);
+          updateDB(viewer_ip);
           return data;
         })
         .catch((err) => {
           console.log(err);
+          setAdBlock(true);
           return err;
         });
     }
     getIP();
 
-    window.addEventListener("pagehide", handleBeforeUnload);
+    document.addEventListener("pagehide", handlePageHide);
+    document.addEventListener("visibilitychange", handleVisiblityChange);
     return () => {
-      window.removeEventListener("pagehide", handleBeforeUnload);
+      document.removeEventListener("pagehide", handlePageHide);
+      document.removeEventListener("visibilitychange", handleVisiblityChange);
     };
-  }, [handleBeforeUnload]);
+  }, [handlePageHide]);
 
   return (
     <DefaultTemplate>

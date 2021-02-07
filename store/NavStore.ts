@@ -8,12 +8,15 @@ class NavStore {
   windowType: string = "pc";
 
   viewers: number = 0;
+  adBlock: boolean = false;
 
   constructor() {
     makeObservable(this, {
       menuIsOpen: observable,
       windowType: observable,
       viewers: observable,
+      adBlock: observable,
+      setAdBlock: action,
       setViewers: action,
       toggleMenu: action,
       updateWindowType: action,
@@ -22,6 +25,9 @@ class NavStore {
 
   setViewers = (num: number) => {
     this.viewers = num;
+  };
+  setAdBlock = (block: boolean) => {
+    this.adBlock = block;
   };
   //   @action
   toggleMenu = () => (this.menuIsOpen = !this.menuIsOpen);
