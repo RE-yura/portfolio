@@ -9,6 +9,7 @@ class NavStore {
 
   viewers: number = 0;
   adBlock: boolean = false;
+  frontViewType: number = 0;
 
   constructor() {
     makeObservable(this, {
@@ -16,17 +17,22 @@ class NavStore {
       windowType: observable,
       viewers: observable,
       adBlock: observable,
-      setAdBlock: action,
+      frontViewType: observable,
+      setFrontViewType: action,
+      setNetworkError: action,
       setViewers: action,
       toggleMenu: action,
       updateWindowType: action,
     });
   }
 
+  setFrontViewType = (type: number) => {
+    this.frontViewType = type;
+  };
   setViewers = (num: number) => {
     this.viewers = num;
   };
-  setAdBlock = (block: boolean) => {
+  setNetworkError = (block: boolean) => {
     this.adBlock = block;
   };
   //   @action

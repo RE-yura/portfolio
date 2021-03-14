@@ -1,9 +1,14 @@
 import React, { FC, useState } from "react";
 import styled from "styled-components";
 import useNavStore from "../../../store/useNavStore";
+import { FrontView } from "../../../config/FrontView";
 
 const ViewersToast: FC = () => {
-  const [viewers, adBlock] = useNavStore((store) => [store.viewers, store.adBlock]);
+  const [viewers, adBlock, setFrontViewType] = useNavStore((store) => [
+    store.viewers,
+    store.adBlock,
+    store.setFrontViewType,
+  ]);
   const [showDescription, setShowDescription] = useState(false);
 
   if (adBlock)
@@ -14,7 +19,7 @@ const ViewersToast: FC = () => {
       </Wrapper>
     );
   if (viewers === 0) return <></>;
-  return <Wrapper>現在{viewers}人が閲覧中</Wrapper>;
+  return <Wrapper onClick={() => setFrontViewType(FrontView.Map)}>現在{viewers}人が閲覧中</Wrapper>;
 };
 
 const Description = styled.div<{ visible: boolean }>`
@@ -67,6 +72,7 @@ const Wrapper = styled.div`
   line-height: 30px;
   background: darkgray;
   color: white;
+  cursor: pointer;
   border-radius: 6px;
 `;
 

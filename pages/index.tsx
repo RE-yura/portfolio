@@ -1,29 +1,42 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import { DefaultTemplate } from "../components/templates/DefaultTemplate";
-import { NavProvider } from "../store/useNavStore";
+import useNavStore, { NavProvider } from "../store/useNavStore";
 import NavStore from "../store/NavStore";
+import useMapStore, { MapProvider } from "../store/useMapStore";
+import MapStore from "../store/MapStore";
 import Top from "../components/organisms/Top";
 import Skills from "../components/organisms/Skills";
 import Section from "../components/templates/Section";
 import Accounts from "../components/organisms/Accounts";
 import Works from "../components/organisms/Works";
 import About from "../components/organisms/About";
+import MapModal from "../components/molecules/MapModal";
+import BackDrop from "../components/atoms/BackDrop";
+import FrontViewController from "../components/organisms/FrontLayer";
+import { FrontView } from "../config/FrontView";
 // import { database } from "../service/FirebaseService";
 import firebase from "firebase/app";
 import "firebase/database";
-import useNavStore from "../store/useNavStore";
 
 const MainPage = () => {
-  const [setViewers, setAdBlock] = useNavStore((store) => [store.setViewers, store.setAdBlock]);
+  const [setViewers, setNetworkError, frontViewType, setFrontViewType] = useNavStore((store) => [
+    store.setViewers,
+    store.setNetworkError,
+    store.frontViewType,
+    store.setFrontViewType,
+  ]);
+  const [points, setPoints] = useMapStore((store) => [store.points, store.setPoints]);
+
   const [userId, setUserId] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState("unknown");
   const database = firebase.database();
 
   // ブラウザを閉じる前に自分を閲覧者から削除
   const handlePageHide = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    // e.preventDefault();
+    // e.stopPropagation();
+    // console.log("pagehide");
     database
       .ref("page_views/" + userId)
       .remove()
@@ -36,8 +49,8 @@ const MainPage = () => {
   };
 
   const handleVisiblityChange = (e) => {
-    console.log(e);
-    if (document.visibilityState !== "visible") handlePageHide(e);
+    // console.log("visibilityState", document.visibilityState);
+    if (document.visibilityState === "hidden") handlePageHide(e);
   };
 
   function updateDB(viewer_ip) {
@@ -52,6 +65,8 @@ const MainPage = () => {
       .child("page_views/" + ip_to_string)
       .set({
         viewer_ip: viewer_ip,
+        timestamp: Math.floor(new Date().getTime() / 1000),
+        location: location,
       });
     database
       .ref()
@@ -67,6 +82,17 @@ const MainPage = () => {
       .on("value", function (snapshot) {
         const views = snapshot.numChildren() || 0;
         setViewers(views);
+        let points_buf = [];
+        snapshot.forEach((data) => {
+          // console.log("The " + data.key + " score is " + data.val()["location"]);
+          if (data.val()["location"] !== "unknown") {
+            const lat = Number(data.val()["location"]?.split(",")[0]);
+            const lng = Number(data.val()["location"]?.split(",")[1]);
+            // console.log(lat, lng);
+            points_buf = [...points_buf, { lat: lat, lng: lng }];
+          }
+        });
+        setPoints(points_buf);
       });
   }
 
@@ -75,7 +101,7 @@ const MainPage = () => {
     // 位置情報取得成功時の処理
     let successCallback = (pos) => {
       setLocation(`${pos.coords.latitude},${pos.coords.longitude}`);
-      console.log(pos);
+      // console.log(pos);
     };
 
     // 位置情報取得失敗時の処理
@@ -97,19 +123,20 @@ const MainPage = () => {
         })
         .catch((err) => {
           console.log(err);
-          setAdBlock(true);
+          setNetworkError(true);
           return err;
         });
     }
     getIP();
+    // console.log("debug3");
 
-    document.addEventListener("pagehide", handlePageHide);
-    document.addEventListener("visibilitychange", handleVisiblityChange);
+    window.addEventListener("pagehide", handlePageHide);
+    // document.addEventListener("visibilitychange", handleVisiblityChange);
     return () => {
-      document.removeEventListener("pagehide", handlePageHide);
-      document.removeEventListener("visibilitychange", handleVisiblityChange);
+      window.removeEventListener("pagehide", handlePageHide);
+      //   document.removeEventListener("visibilitychange", handleVisiblityChange);
     };
-  }, [handlePageHide]);
+  }, [userId, frontViewType]);
 
   return (
     <DefaultTemplate>
@@ -137,6 +164,15 @@ const MainPage = () => {
           <About />
         </Section>
       </Wrapper>
+      {!!frontViewType && (
+        <BackDrop
+          visible={true}
+          clickHandler={() => {
+            setFrontViewType(FrontView.None);
+          }}
+        />
+      )}
+      {!!frontViewType && <FrontViewController viewType={frontViewType} />}
     </DefaultTemplate>
   );
 };
@@ -148,9 +184,12 @@ const Wrapper = styled.div`
 
 const Home = () => {
   const navStore = new NavStore();
+  const mapStore = new MapStore();
   return (
     <NavProvider value={navStore}>
-      <MainPage />
+      <MapProvider value={mapStore}>
+        <MainPage />
+      </MapProvider>
     </NavProvider>
   );
 };
