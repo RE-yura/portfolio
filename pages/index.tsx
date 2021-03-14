@@ -95,21 +95,21 @@ const MainPage = () => {
         setPoints(points_buf);
       });
   }
+  
+  // 位置情報取得成功時の処理
+  let successCallback = (pos) => {
+    setLocation(`${pos.coords.latitude},${pos.coords.longitude}`);
+    // console.log(pos);
+  };
+
+  // 位置情報取得失敗時の処理
+  const failureCallback = (error) => {
+    setLocation("unknown");
+    console.log(error);
+  };
 
   // === Mount Callback ============================================
   useEffect(() => {
-    // 位置情報取得成功時の処理
-    let successCallback = (pos) => {
-      setLocation(`${pos.coords.latitude},${pos.coords.longitude}`);
-      // console.log(pos);
-    };
-
-    // 位置情報取得失敗時の処理
-    const failureCallback = (error) => {
-      setLocation("unknown");
-      console.log(error);
-    };
-
     //ユーザーの現在の位置情報を取得を実行
     navigator.geolocation.getCurrentPosition(successCallback, failureCallback);
 

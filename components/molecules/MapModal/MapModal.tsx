@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import styled from "styled-components";
 import { inject, observer } from "mobx-react";
 
 import ModalWindow from "../../atoms/ModalWindow";
-import Map from "../../atoms/Map";
+// import Map from "../../atoms/Map";
+import dynamic from "next/dynamic";
 
 interface IProps {
   onClose?: () => void;
@@ -11,6 +12,15 @@ interface IProps {
 
 const MapModal = (props: IProps) => {
   //   const [afterAll, setAfterAll] = useState(false);
+
+  const Map = useMemo(
+    () =>
+      dynamic(() => import("../../atoms/Map"), {
+        loading: () => <p>A map is loading</p>,
+        ssr: false,
+      }),
+    []
+  );
 
   const modalContent = (
     <div className="inner">
@@ -20,7 +30,11 @@ const MapModal = (props: IProps) => {
 
   return (
     <Wrapper>
-      <ModalWindow>{modalContent}</ModalWindow>
+      <ModalWindow>
+        <div className="inner">
+          <Map />
+        </div>
+      </ModalWindow>
     </Wrapper>
   );
 };
@@ -38,6 +52,7 @@ const Wrapper = styled.div`
   & .inner {
     // padding: 20px 30px;
     // width: 40vw;
+    height: 100%;
 
     & > h2 {
       margin-right: 10px;

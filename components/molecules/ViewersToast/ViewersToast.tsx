@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import styled from "styled-components";
 import useNavStore from "../../../store/useNavStore";
 import { FrontView } from "../../../config/FrontView";
@@ -10,6 +10,11 @@ const ViewersToast: FC = () => {
     store.setFrontViewType,
   ]);
   const [showDescription, setShowDescription] = useState(false);
+  const [firstClick, setFirstClick] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => setFirstClick(true), 5000);
+  });
 
   if (adBlock)
     return (
@@ -19,7 +24,12 @@ const ViewersToast: FC = () => {
       </Wrapper>
     );
   if (viewers === 0) return <></>;
-  return <Wrapper onClick={() => setFrontViewType(FrontView.Map)}>現在{viewers}人が閲覧中</Wrapper>;
+  return (
+    <Wrapper onClick={() => setFrontViewType(FrontView.Map)} onMouseEnter={() => setFirstClick(true)}>
+      <Description visible={!firstClick}>Let's Click!!</Description>
+      現在{viewers}人が閲覧中
+    </Wrapper>
+  );
 };
 
 const Description = styled.div<{ visible: boolean }>`

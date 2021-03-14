@@ -1,5 +1,13 @@
 module.exports = {
   //   experimental: {
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    });
+
+    return config;
+  },
   rewrites() {
     return [
       // Use rewrite to fetch a Firebase config file from Firebase Hosting
