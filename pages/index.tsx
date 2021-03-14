@@ -19,6 +19,26 @@ import { FrontView } from "../config/FrontView";
 import firebase from "firebase/app";
 import "firebase/database";
 
+function format(dateTime) {
+  const year = dateTime.getFullYear();
+  const month = 1 + dateTime.getMonth();
+  const month2 = (month < 10) ? "0" + month : month;
+  const date = dateTime.getDate();
+  const date2 = (date < 10) ? "0" + date : date;
+  const hour = dateTime.getHours();
+  const hour2 = (hour < 10) ? "0" + hour : hour;
+  const min = dateTime.getMinutes();
+  const min2 = (min < 10) ? "0" + min : min;
+  const sec = dateTime.getSeconds();
+  const sec2 = (sec < 10) ? "0" + sec : sec;
+  const ms = dateTime.getMilliseconds();
+  const ms2 = ("00" + ms).slice(-3);
+  const days = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'];
+  const day = dateTime.getDay();
+  
+  return `${year}/${month2}/${date2} ${hour2}:${min2}:${sec2}.${ms2} (${days[day]})`
+}
+
 const MainPage = () => {
   const [setViewers, setNetworkError, frontViewType, setFrontViewType] = useNavStore((store) => [
     store.setViewers,
@@ -66,6 +86,7 @@ const MainPage = () => {
       .set({
         viewer_ip: viewer_ip,
         timestamp: Math.floor(new Date().getTime() / 1000),
+        date: format(new Date()),  
         location: location,
       });
     database
@@ -74,6 +95,7 @@ const MainPage = () => {
       .set({
         viewer_ip: viewer_ip,
         timestamp: Math.floor(new Date().getTime() / 1000),
+        date: format(new Date()),
         location: location,
       });
     database
