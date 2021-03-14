@@ -3,7 +3,7 @@ const WorksImgs = [
     fname: "portfolio.png",
     title: "ポートフォリオ",
     des:
-      "当ページです．React+Next+MobX+Atomic Design(風?)で作りました．途中から無駄に細かい部分を凝りはじめたせいで3人日くらいかかりました...\nスマホでも見れます．個人的にスマホの動画再生形式は全画面よりインラインが好きです．(場合によるが)",
+      "当ページです．React+Next+MobX+Atomic Design(風?)+Firebaseで作っています．閲覧人数のリアルタイム表示&閲覧者の位置をマップ上で確認できるという謎機能があります．\nスマホでも見れます．個人的にスマホの動画再生形式は全画面よりインラインが好きです．(場合によるが)",
     url: "https://github.com/RE-yura/portfolio",
   },
   {
